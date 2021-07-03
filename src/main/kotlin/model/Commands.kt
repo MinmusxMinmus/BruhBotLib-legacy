@@ -47,7 +47,7 @@ data class CommandInformation(val channel: MessageChannel,
  * A command takes the form of a message sent in a guild, formatted in a specific fashion to be readable by the bot,
  * that invokes execution of a specific task. Said task may log the different events it undergoes.
  */
-abstract class Command(protected val trigger: Message) : Serializable {
+abstract class Command(protected open val trigger: Message) : Serializable {
     companion object {
         private const val serialVersionUID = 1L
     }
