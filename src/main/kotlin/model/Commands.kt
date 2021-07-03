@@ -6,6 +6,7 @@ import net.dv8tion.jda.api.entities.MessageChannel
 import net.dv8tion.jda.api.entities.User
 import java.io.Serializable
 import java.time.Instant
+import kotlin.reflect.KClass
 
 /**
  * Describes a notable event during command execution. This is used for both normal events and errors / exceptions that
@@ -21,12 +22,14 @@ data class ExecutionError(override val timestamp: Instant,
                           val exception: Exception?) : ExecutionEventBase(timestamp, info)
 
 /**
- * Defines the command as viewed by the end user. Includes the name of the command, as well as a small description of both
- * the command and the parameters it requires.
+ * Defines all information required to use its corresponding command. Includes the name of the command, as well as a
+ * small description of both the command and the parameters it requires. Also includes a reference to the command class
+ * it belongs to.
  */
 data class CommandDeclaration(val name: String,
                               val description: String,
-                              val parameters: String,) : Serializable
+                              val parameters: String,
+                              val command: KClass<Command>) : Serializable
 
 /**
  * Valuable information about a command at any point of execution.
