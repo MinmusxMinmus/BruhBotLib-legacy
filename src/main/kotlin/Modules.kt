@@ -22,7 +22,7 @@ removes the module's commands to its command pool (as well as whatever else modu
  * adds. Some modules may not add commands at all, in which case they would send an empty set. Modules must also
  * implement [getCommand], a method to obtain a command instance for the given [CommandDeclaration].
  */
-interface BBModules : Remote {
+interface BBModule : Remote {
     fun commands(): Set<CommandDeclaration>
     fun getCommand(type: CommandDeclaration): Command
 }

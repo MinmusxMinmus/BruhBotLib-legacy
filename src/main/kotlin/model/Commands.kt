@@ -1,33 +1,80 @@
 package model
 
+import net.dv8tion.jda.api.entities.Guild
 import net.dv8tion.jda.api.entities.Message
+import net.dv8tion.jda.api.entities.MessageChannel
+import net.dv8tion.jda.api.entities.User
 import java.io.Serializable
+import java.time.Instant
+
+/**
+ * Describes a notable event during command execution. This is used for both normal events and errors / exceptions that
+ * might occur, indicated by the subclass.
+ */
+abstract class ExecutionEventBase(open val timestamp: Instant, open val info: String) : Serializable
+
+data class ExecutionEvent(override val timestamp: Instant,
+                          override val info: String) : ExecutionEventBase(timestamp, info)
+
+data class ExecutionError(override val timestamp: Instant,
+                          override val info: String,
+                          val exception: Exception?) : ExecutionEventBase(timestamp, info)
+
+/**
+ * Defines the command as viewed by the end user. Includes the name of the command, as well as a small description of both
+ * the command and the parameters it requires.
+ */
+data class CommandDeclaration(val name: String,
+                              val description: String,
+                              val parameters: String,) : Serializable
+
+/**
+ * Valuable information about a command at any point of execution.
+ */
+data class CommandInformation(val channel: MessageChannel,
+                              val author: User,
+                              val guild: Guild,
+                              val success: Boolean,
+                              val failure: Boolean,
+                              val errorMessage: String,) : Serializable
 
 /**
  * The simplest way to interact with the bot.
  *
  * A command takes the form of a message sent in a guild, formatted in a specific fashion to be readable by the bot,
- * that invokes execution of a specific task.
+ * that invokes execution of a specific task. Said task may log the different events it undergoes.
  */
-abstract class Command(val trigger: Message) : Serializable {
+abstract class Command(protected val trigger: Message) : Serializable {
     companion object {
         private const val serialVersionUID = 1L
     }
-    /**
-     * Returns the name of the command. This equates to the name users must type to execute the command.
-     */
-    abstract fun getName() : String
-    /**
-     * Returns a simple description of the command. This will be displayed in the command help section.
-     */
-    abstract fun getDescription(): String
-    /**
-     * Returns the command's task object.
-     */
-    abstract fun getTask(): BBTask
-}
 
-interface BBTask : Serializable {
-    fun isFinished(): Boolean
-    fun execute()
+    // Shortcuts
+    val channel get() = trigger.channel
+    val author get() = trigger.author
+    val guild get() = trigger.guild
+
+    protected val events = mutableListOf<ExecutionEventBase>()
+    val success get() = events.none { it is ExecutionError }
+    val failure get() = executed && events.last() is ExecutionError
+    var executed = false
+        private set
+
+    fun execute() {
+        try {
+            exec()
+        } catch (e: Exception) {
+            events.add(ExecutionError(Instant.now(), "Unknown exception caused termination", e))
+        } finally {
+            executed = true
+        }
+    }
+    fun details() = CommandInformation(channel, author, guild, success, failure, events.last().info)
+
+
+    protected abstract fun exec()
+    /**
+     * Returns the command's [CommandDeclaration].
+     */
+    abstract fun declaration(): CommandDeclaration
 }
