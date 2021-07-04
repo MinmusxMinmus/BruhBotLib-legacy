@@ -11,12 +11,9 @@ be a command that allows you to add/remove modules (for example, !module add/rem
 removes the module's commands to its command pool (as well as whatever else modules are able to add), and voila!
 
 TODO: Add the ability for a module to register new listeners
- */
-
-/**
- * Returns the specific BruhBot registry. Make sure to call this method - the registry location might change in the future!
- */
-fun LocateRegistry.getBruhBotRegistry() = LocateRegistry.getRegistry()
+TODO: Add the ability for a module to declare its dependencies
+TODO: Allow module conflicts to be resolved somewhere (CMD?), instead of discarding duplicates.
+*/
 
 /**
  * This interface serves to define all possible bot modules.
