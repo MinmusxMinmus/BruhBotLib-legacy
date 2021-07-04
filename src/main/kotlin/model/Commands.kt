@@ -47,7 +47,7 @@ abstract class Command(protected val trigger: Message) : Serializable {
     protected val events = mutableListOf<ExecutionEventBase>()
 
     val success get() = events.none { it is ExecutionError }
-    val failure get() = executed && events.last() is ExecutionError
+    val failure get() = executed && !events.isEmpty() && events.last() is ExecutionError
     var executed = false
         private set
 
