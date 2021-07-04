@@ -1,6 +1,5 @@
 package remote
 
-import model.Command
 import model.CommandDeclaration
 import java.rmi.Remote
 
