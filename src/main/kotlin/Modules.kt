@@ -9,6 +9,8 @@ The objective is to allow easy module creation. Anyone that wants to create modu
 then create an executable JAR that adds the corresponding factory to the registry for RMI. In the bot core, there should
 be a command that allows you to add/remove modules (for example, !module add/remove modulename). The bot then adds or
 removes the module's commands to its command pool (as well as whatever else modules are able to add), and voila!
+
+TODO: Add the ability for a module to register new listeners
  */
 
 /**
@@ -19,10 +21,8 @@ removes the module's commands to its command pool (as well as whatever else modu
  * offers additional commands to the bot.
  *
  * Any module must implement [commands], a function which sends information about the commands the module
- * adds. Some modules may not add commands at all, in which case they would send an empty set. Modules must also
- * implement [getCommand], a method to obtain a command instance for the given [CommandDeclaration].
+ * adds. Some modules may not add commands at all, in which case they would send an empty set.
  */
 interface BBModule : Remote {
     fun commands(): Set<CommandDeclaration>
-    fun getCommand(type: CommandDeclaration): Command
 }
