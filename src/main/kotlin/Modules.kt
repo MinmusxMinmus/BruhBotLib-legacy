@@ -2,6 +2,7 @@ package remote
 
 import model.CommandDeclaration
 import java.rmi.Remote
+import java.rmi.registry.LocateRegistry
 
 /*
 The objective is to allow easy module creation. Anyone that wants to create modules should just include this library,
@@ -11,6 +12,11 @@ removes the module's commands to its command pool (as well as whatever else modu
 
 TODO: Add the ability for a module to register new listeners
  */
+
+/**
+ * Returns the specific BruhBot registry. Make sure to call this method - the registry location might change in the future!
+ */
+fun LocateRegistry.getBruhBotRegistry() = LocateRegistry.getRegistry()
 
 /**
  * This interface serves to define all possible bot modules.
