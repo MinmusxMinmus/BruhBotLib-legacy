@@ -4,11 +4,8 @@ import net.dv8tion.jda.api.entities.Guild
 import net.dv8tion.jda.api.entities.Message
 import net.dv8tion.jda.api.entities.MessageChannel
 import net.dv8tion.jda.api.entities.User
-import remote.model.CommandPermission
-import remote.model.ExecutionError
-import remote.model.ExecutionEventBase
+import remote.model.*
 import java.io.Serializable
-import java.time.Instant
 import kotlin.reflect.KClass
 
 /**
@@ -18,7 +15,7 @@ import kotlin.reflect.KClass
  */
 data class CommandDeclaration(val name: String,
                               val description: String,
-                              val parameters: String,
+                              val parameters: List<ParameterType>,
                               val command: KClass<out Command>,
                               val permission: CommandPermission) : Serializable
 
@@ -30,7 +27,9 @@ data class CommandInformation(val channel: MessageChannel,
                               val guild: Guild,
                               val success: Boolean,
                               val failure: Boolean,
-                              val errorMessage: String,) : Serializable
+                              val errorMessage: String,
+                              val arguments: List<ParameterValue>,
+                              val events: List<ExecutionEventBase>) : Serializable
 
 /**
  * The simplest way to interact with the bot.
@@ -38,13 +37,15 @@ data class CommandInformation(val channel: MessageChannel,
  * A command takes the form of a message sent in a guild, formatted in a specific fashion to be readable by the bot,
  * that invokes execution of a specific task. Said task may log the different events it undergoes.
  */
-abstract class Command(protected open val trigger: Message) : Serializable {
+abstract class Command(protected val trigger: Message) : Serializable {
     // Shortcuts
     val channel get() = trigger.channel
     val author get() = trigger.author
     val guild get() = trigger.guild
 
+    protected val arguments by lazy { ArgumentParser().parse(trigger.contentRaw, declaration().parameters) }
     protected val events = mutableListOf<ExecutionEventBase>()
+
     val success get() = events.none { it is ExecutionError }
     val failure get() = executed && events.last() is ExecutionError
     var executed = false
@@ -69,7 +70,7 @@ abstract class Command(protected open val trigger: Message) : Serializable {
      */
     protected abstract fun exec()
 
-    fun details() = CommandInformation(channel, author, guild, success, failure, events.last().info)
+    fun details() = CommandInformation(channel, author, guild, success, failure, events.last().info, arguments, events.toList())
 
     /**
      * Returns the command's [CommandDeclaration].
