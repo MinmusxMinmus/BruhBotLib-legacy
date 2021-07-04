@@ -14,9 +14,18 @@ import kotlin.reflect.KClass
  */
 abstract class ExecutionEventBase(open val timestamp: Instant, open val info: String) : Serializable
 
+/**
+ * Describes a standard event during command execution. This can be as simple as beginning a new loop, finishing processing
+ * of a certain task, or anything else worth mentioning.
+ */
 data class ExecutionEvent(override val timestamp: Instant,
                           override val info: String) : ExecutionEventBase(timestamp, info)
 
+/**
+ * Describes an error during command execution. Said error can be caused by an exception (caught or uncaught) or it can
+ * be caused by a failed condition. The error can be fatal and force to stop command execution, or it can be dealt with
+ * using an alternative solution, or even just aknowledged and ignored henceforth.
+ */
 data class ExecutionError(override val timestamp: Instant,
                           override val info: String,
                           val exception: Exception?) : ExecutionEventBase(timestamp, info)
@@ -29,7 +38,7 @@ data class ExecutionError(override val timestamp: Instant,
 data class CommandDeclaration(val name: String,
                               val description: String,
                               val parameters: String,
-                              val command: KClass<Command>) : Serializable
+                              val command: KClass<out Command>) : Serializable
 
 /**
  * Valuable information about a command at any point of execution.
