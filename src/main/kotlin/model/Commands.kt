@@ -52,12 +52,23 @@ abstract class Command(protected val trigger: Message) : Serializable {
         private set
 
     fun execute() {
+        // Permission check
         if (!declaration().permission.validatePermission(trigger)) {
             events.add(ExecutionError(info = "Permission check failed. Command cannot execute.", exception = null))
+            execWhenBadPerms()
             return
         }
+
+        // Argument check
+        if (arguments.any { it is ParameterError }) {
+            events.add(ExecutionError(info = "Argument check failed. Command cannot execute.", exception = null))
+            execWhenBadArgs()
+            return
+        }
+
+        // Actual command
         try {
-            exec()
+            execCommand()
         } catch (e: Exception) {
             events.add(ExecutionError(info = "Unknown exception caused termination.", exception = e))
         } finally {
@@ -68,7 +79,19 @@ abstract class Command(protected val trigger: Message) : Serializable {
     /**
      * Contains the command's execution code. This is where modules should insert all of the command logic.
      */
-    protected abstract fun exec()
+    protected abstract fun execCommand()
+
+    /**
+     * Contains the code executed when bad permissions have been detected. This method will usually have a message
+     * telling the user that he can't execute the command for X reason.
+     */
+    protected abstract fun execWhenBadPerms()
+
+    /**
+     * Contains the code executed when bad arguments have been introduced. This method will usually have the bot send a
+     * message to the invoker explaining what went wrong.
+     */
+    protected abstract fun execWhenBadArgs()
 
     fun details() = CommandInformation(channel, author, guild, success, failure, events.last().info, arguments, events.toList())
 
