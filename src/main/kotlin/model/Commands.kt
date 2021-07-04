@@ -57,10 +57,6 @@ data class CommandInformation(val channel: MessageChannel,
  * that invokes execution of a specific task. Said task may log the different events it undergoes.
  */
 abstract class Command(protected open val trigger: Message) : Serializable {
-    companion object {
-        private const val serialVersionUID = 1L
-    }
-
     // Shortcuts
     val channel get() = trigger.channel
     val author get() = trigger.author
