@@ -18,7 +18,7 @@ Examples of permissions:
  * The most general way of checking for permissions. Override this method in your modules to create different,
  * completely customized permissions for your command.
  */
-abstract class CommandPermission(open val name: String) : Serializable {
+abstract class CommandPermission(val name: String) : Serializable {
     abstract fun validatePermission(message: Message) : Boolean
 }
 /**
