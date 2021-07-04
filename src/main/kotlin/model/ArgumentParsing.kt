@@ -147,6 +147,8 @@ class DecimalValue(val valueDouble: Double): ParameterValue(valueDouble.toString
  * To implement your own parameter error, use the badParameterMessage function in [ParameterType].
  */
 sealed class ParameterError(val userMessage: String) : ParameterValue("")
+
+class MissingParameter : ParameterError("This argument is missing. Perhaps there's been issues reading the previous ones?")
 /**
  * Represents a mistake in writing, where a user forgot to type the first quotation mark (or both).
  */
@@ -167,6 +169,11 @@ class ArgumentParser {
         var remainingParams = paramString
         val arguments = mutableListOf<ParameterValue>()
         expected.forEach {
+            // Arguments have been consumed already
+            if (remainingParams.isEmpty()) {
+                arguments += MissingParameter()
+                return@forEach
+            }
             val param = it.removeFromParams(remainingParams)
             if (!it.validate(param.first)) {
                 arguments += BadParameter(it)
