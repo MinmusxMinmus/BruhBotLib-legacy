@@ -12,14 +12,15 @@ import java.time.Instant
 import kotlin.reflect.KClass
 
 /**
- * Defines all information required to use its corresponding command. Includes the name of the command, as well as a
- * small description of both the command and the parameters it requires. Also includes a reference to the command class
- * it belongs to.
+ * Defines all information required to use its corresponding command. Includes the name of the command, a small
+ * description of both the command and the parameters it requires, a reference to the command class it belongs to, and
+ * the permission the command requires to be executed.
  */
 data class CommandDeclaration(val name: String,
                               val description: String,
                               val parameters: String,
-                              val command: KClass<out Command>) : Serializable
+                              val command: KClass<out Command>,
+                              val permission: CommandPermission) : Serializable
 
 /**
  * Valuable information about a command at any point of execution.
@@ -50,18 +51,26 @@ abstract class Command(protected open val trigger: Message) : Serializable {
         private set
 
     fun execute() {
+        if (!declaration().permission.validatePermission(trigger)) {
+            events.add(ExecutionError(info = "Permission check failed. Command cannot execute.", exception = null))
+            return
+        }
         try {
             exec()
         } catch (e: Exception) {
-            events.add(ExecutionError(Instant.now(), "Unknown exception caused termination", e))
+            events.add(ExecutionError(info = "Unknown exception caused termination.", exception = e))
         } finally {
             executed = true
         }
     }
+
+    /**
+     * Contains the command's execution code. This is where modules should insert all of the command logic.
+     */
+    protected abstract fun exec()
+
     fun details() = CommandInformation(channel, author, guild, success, failure, events.last().info)
 
-
-    protected abstract fun exec()
     /**
      * Returns the command's [CommandDeclaration].
      */
