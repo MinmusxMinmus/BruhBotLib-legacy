@@ -47,7 +47,7 @@ sealed class ParameterType(val name: String, var error: ParameterError?) {
 abstract class SimpleParameterType(name: String, val separationPolicy: SeparationPolicy) : ParameterType(name, null) {
     override fun removeFromParams(remainingParams: String) = when (separationPolicy) {
             SeparationPolicy.QUOTATION_MARKS -> parseQuotations(remainingParams)
-            SeparationPolicy.OPTIONAL_QUOTATION_MARKS -> if (!remainingParams.startsWith('"')) parseSpaces(remainingParams) else parseQuotations(remainingParams)
+            SeparationPolicy.OPTIONAL_QUOTATION_MARKS -> if (remainingParams.startsWith('"')) parseQuotations(remainingParams) else parseSpaces(remainingParams)
             SeparationPolicy.SPACES -> parseSpaces(remainingParams)
         }
 
@@ -69,7 +69,7 @@ abstract class SimpleParameterType(name: String, val separationPolicy: Separatio
             // If -1 it means there's no more quotation marks
             // If 0 it means the parameter is an empty string
             if (i < 1) {
-                if (i == -1) error = MissingFirstQuotation()
+                if (i == -1) error = MissingLastQuotation()
                 return Pair("", str)
             }
 
@@ -99,7 +99,8 @@ abstract class SimpleParameterType(name: String, val separationPolicy: Separatio
  */
 abstract class ParameterValue(val valueStr: String)
 
-//# Common parameter/value pairs #\
+// Common parameter/value pairs
+// Normal string parameters
 class StringParameter : SimpleParameterType("String", SeparationPolicy.QUOTATION_MARKS) {
     override fun validate(param: String) = true
 
@@ -107,8 +108,16 @@ class StringParameter : SimpleParameterType("String", SeparationPolicy.QUOTATION
 
     override fun getParameterValue(value: String) = StringValue(value)
 }
+class KeywordParameter : SimpleParameterType("Keyword", SeparationPolicy.OPTIONAL_QUOTATION_MARKS) {
+    override fun validate(param: String) = true
+
+    override fun badParameterMessage() = "This literally can't show up"
+
+    override fun getParameterValue(value: String) = StringValue(value)
+}
 class StringValue(valueStr: String) : ParameterValue(valueStr)
 
+// Integer parameters
 class IntegerParameter : SimpleParameterType("Integer", SeparationPolicy.OPTIONAL_QUOTATION_MARKS) {
     override fun validate(param: String): Boolean {
         return try {
@@ -125,6 +134,7 @@ class IntegerParameter : SimpleParameterType("Integer", SeparationPolicy.OPTIONA
 }
 class IntegerValue(val valueInt: Int) : ParameterValue(valueInt.toString())
 
+// Decimal parameters
 class DecimalParameter : SimpleParameterType("Decimal number", SeparationPolicy.OPTIONAL_QUOTATION_MARKS) {
     override fun validate(param: String): Boolean {
         return try {
@@ -148,6 +158,14 @@ class DecimalValue(val valueDouble: Double): ParameterValue(valueDouble.toString
  */
 sealed class ParameterError(val userMessage: String) : ParameterValue("")
 
+/**
+ * Represents a generic error. You can add whatever text as the error message.
+ */
+class GenericError(description: String) : ParameterError(description)
+/**
+ * Represents a mistake in writing, where a user forgot to enter a parameter. This most likely will appear with badly
+ * written parameters, as the parsing messes up and takes more text than needed.
+ */
 class MissingParameter : ParameterError("This argument is missing. Perhaps there's been issues reading the previous ones?")
 /**
  * Represents a mistake in writing, where a user forgot to type the first quotation mark (or both).
@@ -161,26 +179,39 @@ class MissingLastQuotation : ParameterError("Argument is missing the last quotat
  * Represents a general mistake, dependent on the expected parameter type.
  */
 class BadParameter(type: ParameterType) : ParameterError(type.badParameterMessage())
+/**
+ * Represents a general parsing mistake, where an unknown exception has been thrown by the parser.
+ */
+class ExceptionThrown(val exception: Exception) : ParameterError("An exception was thrown during parameter parsing.")
 
 class ArgumentParser {
     fun parse(paramString: String, expected: List<ParameterType>): List<ParameterValue> {
-        if (paramString.isEmpty() || expected.isEmpty()) return listOf()
-
         var remainingParams = paramString
         val arguments = mutableListOf<ParameterValue>()
         expected.forEach {
             // Arguments have been consumed already
             if (remainingParams.isEmpty()) {
+                println("Arguments have been consumed. Missing parameter/s!")
                 arguments += MissingParameter()
                 return@forEach
             }
-            val param = it.removeFromParams(remainingParams)
-            if (!it.validate(param.first)) {
-                arguments += BadParameter(it)
+            try {
+                val param = it.removeFromParams(remainingParams)
+                if (!it.validate(param.first)) {
+                    arguments += BadParameter(it)
+                    return@forEach
+                }
+                arguments += it.getParameterValue(param.first)
+                remainingParams = param.second
+            } catch (e: Exception) {
+                arguments += ExceptionThrown(e)
                 return@forEach
             }
-            arguments += it.getParameterValue(param.first)
-            remainingParams = param.second
+        }
+        // If there's still text, it means the parameters were malformed
+        if (!remainingParams.isEmpty()) {
+            println("There's still text ($remainingParams), bad")
+            arguments += GenericError("Missing parameters")
         }
         return arguments.toList()
     }
