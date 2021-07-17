@@ -21,10 +21,11 @@ TODO: Allow module conflicts to be resolved somewhere (CMD?), instead of discard
  * A module is defined as an independent executable that can be remotely invoked by the bot, offering additional
  * functionality that is not necessary for basic execution. An example would be a module that only
  * offers additional commands to the bot.
- *
- * Any module must implement [commands], a function which sends information about the commands the module
- * adds. Some modules may not add commands at all, in which case they would send an empty set.
  */
 interface BBModule : Remote {
+    /**
+     * A function which sends information about the commands the module adds. Some modules may not add commands at all,
+     * in which case they should send an empty set.
+     */
     fun commands(): Set<CommandDeclaration>
 }
