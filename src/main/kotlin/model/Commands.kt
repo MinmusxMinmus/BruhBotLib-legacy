@@ -15,8 +15,8 @@ import kotlin.reflect.KClass
  */
 data class CommandDeclaration(val name: String,
                               val description: String,
-                              val parameters: List<ParameterType>,
-                              val command: KClass<out Command>,
+                              val parameters: List<Pair<String, ParameterType>>,
+                              val command: KClass<out SimpleCommand>,
                               val permission: CommandPermission) : Serializable
 
 /**
@@ -36,14 +36,22 @@ data class CommandInformation(val channel: MessageChannel,
  *
  * A command takes the form of a message sent in a guild, formatted in a specific fashion to be readable by the bot,
  * that invokes execution of a specific task. Said task may log the different events it undergoes.
+ *
+ * This command class cannot handle complex logic, such as an interactive menu that allows the user to input multiple
+ * times. The only information required to execute the command should be contained in the [trigger] message sent at
+ * the beginning.
  */
-abstract class Command(protected val trigger: Message) : Serializable {
+abstract class SimpleCommand(protected val trigger: Message) : Serializable {
     // Shortcuts
     val channel get() = trigger.channel
     val author get() = trigger.author
     val guild get() = trigger.guild
 
-    protected val arguments by lazy { ArgumentParser().parse(trigger.contentRaw, declaration().parameters) }
+    protected val arguments by lazy {
+        val cmdname = declaration().name
+        val args = trigger.contentRaw.substring(trigger.contentRaw.indexOf(cmdname) + cmdname.length).trim()
+        ArgumentParser().parse(args, declaration().parameters.map { it.second })
+    }
     protected val events = mutableListOf<ExecutionEventBase>()
 
     val success get() = events.none { it is ExecutionError }
@@ -60,7 +68,7 @@ abstract class Command(protected val trigger: Message) : Serializable {
         }
 
         // Argument check
-        if (arguments.any { it is ParameterError }) {
+        if (arguments.size != declaration().parameters.size || arguments.any { it is ParameterError }) {
             events.add(ExecutionError(info = "Argument check failed. Command cannot execute.", exception = null))
             execWhenBadArgs()
             return
