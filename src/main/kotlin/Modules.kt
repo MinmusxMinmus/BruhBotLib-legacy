@@ -28,4 +28,9 @@ interface BBModule : Remote {
      * in which case they should send an empty set.
      */
     fun commands(): Set<CommandDeclaration>
+
+    /**
+     * The module's name. Must be a unique identifier!
+     */
+    fun name(): String
 }
