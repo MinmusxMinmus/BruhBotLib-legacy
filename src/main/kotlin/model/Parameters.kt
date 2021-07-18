@@ -98,7 +98,7 @@ sealed class SimpleParameterType(name: String, val separationPolicy: SeparationP
 /**
  * The second part of parameter implementing, this class holds the value of a correct parameter.
  */
-abstract class ParameterValue(val valueStr: String): Serializable
+sealed class ParameterValue(val valueStr: String): Serializable
 
 // Common parameter/value pairs
 // Normal string parameters
