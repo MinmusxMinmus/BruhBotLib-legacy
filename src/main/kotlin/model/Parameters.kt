@@ -100,8 +100,13 @@ sealed class SimpleParameterType(name: String, val separationPolicy: SeparationP
  */
 sealed class ParameterValue(val valueStr: String): Serializable
 
-// Common parameter/value pairs
-// Normal string parameters
+// Possible parameter types
+class WildcardType : ParameterType("Anything", null) {
+    override fun badParameterMessage() = "There's no way to get this message"
+    override fun getParameterValue(value: String) = StringValue(value)
+    override fun removeFromParams(remainingParams: String) = Pair(remainingParams, "")
+    override fun validate(param: String) = true
+}
 class StringParameter : SimpleParameterType("String", SeparationPolicy.QUOTATION_MARKS) {
     override fun validate(param: String) = true
 
