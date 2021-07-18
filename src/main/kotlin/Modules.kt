@@ -2,6 +2,7 @@ package remote
 
 import model.CommandDeclaration
 import java.rmi.Remote
+import java.rmi.RemoteException
 import java.rmi.registry.LocateRegistry
 
 /*
@@ -27,10 +28,12 @@ interface BBModule : Remote {
      * A function which sends information about the commands the module adds. Some modules may not add commands at all,
      * in which case they should send an empty set.
      */
+    @Throws(RemoteException::class)
     fun commands(): Set<CommandDeclaration>
 
     /**
      * The module's name. Must be a unique identifier!
      */
+    @Throws(RemoteException::class)
     fun name(): String
 }
