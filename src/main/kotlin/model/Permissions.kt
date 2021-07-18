@@ -18,19 +18,19 @@ Examples of permissions:
  * The most general way of checking for permissions. Override this method in your modules to create different,
  * completely customized permissions for your command.
  */
-abstract class CommandPermission(val name: String) : Serializable {
+sealed class CommandPermission(val name: String) : Serializable {
     abstract fun validatePermission(message: Message) : Boolean
 }
 /**
  * Checks for multiple types of permissions. All of the given permissions must apply for the command to be greenlit.
  */
-open class AllPermissions(private val restrictions: Set<CommandPermission>) : CommandPermission("Only messages that validate specific restrictions") {
+sealed class AllPermissions(private val restrictions: Set<CommandPermission>) : CommandPermission("Only messages that validate specific restrictions") {
     override fun validatePermission(message: Message) = restrictions.all { it.validatePermission(message) }
 }
 /**
  * Checks for multiple types of permissions. Any of the given permissions must apply for the command to be greenlit.
  */
-open class AnyPermission(private val restrictions: Set<CommandPermission>) : CommandPermission("Only messages that validate specific restrictions") {
+sealed class AnyPermission(private val restrictions: Set<CommandPermission>) : CommandPermission("Only messages that validate specific restrictions") {
     override fun validatePermission(message: Message) = restrictions.any { it.validatePermission(message) }
 }
 
@@ -48,11 +48,11 @@ open class RolePermission(private val permission: Permission) : CommandPermissio
 /**
  * Checks for multiple role permissions in the message author. All of the permissions must be present for the command to be greenlit.
  */
-open class AllRolePermissions(permissions : Set<Permission>) : AllPermissions(permissions.mapTo(HashSet()) { RolePermission(it) })
+sealed class AllRolePermissions(permissions : Set<Permission>) : AllPermissions(permissions.mapTo(HashSet()) { RolePermission(it) })
 /**
  * Checks for multiple role permissions in the message author. Any of the permissions must be present for the command to be greenlit.
  */
-open class AnyRolePermissions(permissions : Set<Permission>) : AnyPermission(permissions.mapTo(HashSet()) { RolePermission(it) })
+sealed class AnyRolePermissions(permissions : Set<Permission>) : AnyPermission(permissions.mapTo(HashSet()) { RolePermission(it) })
 
 // Some common permissions
 /**
