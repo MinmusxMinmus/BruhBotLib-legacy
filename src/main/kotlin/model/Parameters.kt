@@ -95,11 +95,6 @@ sealed class SimpleParameterType(name: String, val separationPolicy: SeparationP
     }
 }
 
-/**
- * The second part of parameter implementing, this class holds the value of a correct parameter.
- */
-sealed class ParameterValue(val valueStr: String): Serializable
-
 // Possible parameter types
 class WildcardType : ParameterType("Anything", null) {
     override fun badParameterMessage() = "There's no way to get this message"
@@ -141,6 +136,11 @@ class DecimalParameter : SimpleParameterType("Decimal number", SeparationPolicy.
     override fun badParameterMessage() = "The argument cannot be interpreted as a decimal number of any sort."
     override fun getParameterValue(value: String) = DecimalValue(value.toDouble())
 }
+
+/**
+ * The second part of parameter implementing, this class holds the value of a correct parameter.
+ */
+sealed class ParameterValue(val valueStr: String): Serializable
 
 // Possible parameter values
 class StringValue(valueStr: String) : ParameterValue(valueStr)
