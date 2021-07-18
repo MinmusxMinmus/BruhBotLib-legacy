@@ -25,7 +25,7 @@ enum class SeparationPolicy {
  * The [error] field is included as a way to pass information between [removeFromParams] and [validate]. An error while
  * executing the first method can be stored in this variable, then checked in the second method to return fast.
  */
-sealed class ParameterType(val name: String, var error: ParameterError?) {
+abstract class ParameterType(val name: String, var error: ParameterError?) {
     /**
      * Confirms that the string represents a valid instance of the parameter type.
      */
