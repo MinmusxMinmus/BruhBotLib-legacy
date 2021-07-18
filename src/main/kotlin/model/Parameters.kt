@@ -109,21 +109,14 @@ class WildcardType : ParameterType("Anything", null) {
 }
 class StringParameter : SimpleParameterType("String", SeparationPolicy.QUOTATION_MARKS) {
     override fun validate(param: String) = true
-
     override fun badParameterMessage() = "There's no way to get this message"
-
     override fun getParameterValue(value: String) = StringValue(value)
 }
 class KeywordParameter : SimpleParameterType("Keyword", SeparationPolicy.OPTIONAL_QUOTATION_MARKS) {
     override fun validate(param: String) = true
-
     override fun badParameterMessage() = "This literally can't show up"
-
     override fun getParameterValue(value: String) = StringValue(value)
 }
-class StringValue(valueStr: String) : ParameterValue(valueStr)
-
-// Integer parameters
 class IntegerParameter : SimpleParameterType("Integer", SeparationPolicy.OPTIONAL_QUOTATION_MARKS) {
     override fun validate(param: String): Boolean {
         return try {
@@ -133,14 +126,9 @@ class IntegerParameter : SimpleParameterType("Integer", SeparationPolicy.OPTIONA
             false
         }
     }
-
     override fun badParameterMessage() = "The argument cannot be interpreted as an integer of any sort."
-
     override fun getParameterValue(value: String) = IntegerValue(value.toInt())
 }
-class IntegerValue(val valueInt: Int) : ParameterValue(valueInt.toString())
-
-// Decimal parameters
 class DecimalParameter : SimpleParameterType("Decimal number", SeparationPolicy.OPTIONAL_QUOTATION_MARKS) {
     override fun validate(param: String): Boolean {
         return try {
@@ -150,19 +138,12 @@ class DecimalParameter : SimpleParameterType("Decimal number", SeparationPolicy.
             false
         }
     }
-
     override fun badParameterMessage() = "The argument cannot be interpreted as a decimal number of any sort."
-
     override fun getParameterValue(value: String) = DecimalValue(value.toDouble())
 }
+
+
+// Possible parameter values
+class StringValue(valueStr: String) : ParameterValue(valueStr)
+class IntegerValue(val valueInt: Int) : ParameterValue(valueInt.toString())
 class DecimalValue(val valueDouble: Double): ParameterValue(valueDouble.toString())
-
-class WildcardType : ParameterType("Wildcard", null) {
-    override fun badParameterMessage() = ""
-
-    override fun getParameterValue(value: String) = StringValue("")
-
-    override fun removeFromParams(remainingParams: String) = Pair(remainingParams, "")
-
-    override fun validate(param: String) = true
-}
