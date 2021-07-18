@@ -6,7 +6,6 @@ import net.dv8tion.jda.api.entities.MessageChannel
 import net.dv8tion.jda.api.entities.User
 import remote.model.*
 import java.io.Serializable
-import kotlin.reflect.KClass
 
 /**
  * Defines all information required to use its corresponding command. Includes the name of the command, a small
@@ -16,7 +15,6 @@ import kotlin.reflect.KClass
 data class CommandDeclaration(val name: String,
                               val description: String,
                               val parameters: List<Pair<String, ParameterType>>,
-                              val command: KClass<out SimpleCommand>,
                               val permission: CommandPermission) : Serializable
 
 /**

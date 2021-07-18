@@ -1,6 +1,8 @@
 package remote
 
 import model.CommandDeclaration
+import model.SimpleCommand
+import net.dv8tion.jda.api.entities.Message
 import java.rmi.Remote
 import java.rmi.RemoteException
 import java.rmi.registry.LocateRegistry
@@ -30,6 +32,12 @@ interface BBModule : Remote {
      */
     @Throws(RemoteException::class)
     fun commands(): Set<CommandDeclaration>
+
+    /**
+     * Returns a new instance of the requested command. If the command doesn't exist, return null.
+     */
+    @Throws(RemoteException::class)
+    fun newCommand(declaration: CommandDeclaration, trigger: Message): SimpleCommand?
 
     /**
      * The module's name. Must be a unique identifier!
