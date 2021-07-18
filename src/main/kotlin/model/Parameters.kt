@@ -102,14 +102,14 @@ class WildcardType : ParameterType("Anything", null) {
     override fun removeFromParams(remainingParams: String) = Pair(remainingParams, "")
     override fun validate(param: String) = true
 }
-class StringParameter : SimpleParameterType("String", SeparationPolicy.QUOTATION_MARKS) {
+class StringParameter(val canContainSpaces: Boolean) : SimpleParameterType("String", if (canContainSpaces) SeparationPolicy.QUOTATION_MARKS else SeparationPolicy.OPTIONAL_QUOTATION_MARKS) {
     override fun validate(param: String) = true
     override fun badParameterMessage() = "There's no way to get this message"
     override fun getParameterValue(value: String) = StringValue(value)
 }
-class KeywordParameter : SimpleParameterType("Keyword", SeparationPolicy.OPTIONAL_QUOTATION_MARKS) {
-    override fun validate(param: String) = true
-    override fun badParameterMessage() = "This literally can't show up"
+class KeywordParameter(val words: Set<String>) : SimpleParameterType(words.joinToString(separator = "\", \"", prefix = "\"", postfix = "\"") { it }, SeparationPolicy.OPTIONAL_QUOTATION_MARKS) {
+    override fun validate(param: String) = words.contains(param)
+    override fun badParameterMessage() = "Invalid keyword. Possible values are: ${words.joinToString(separator = "\", \"", prefix = "\"", postfix = "\"") { it }}"
     override fun getParameterValue(value: String) = StringValue(value)
 }
 class IntegerParameter : SimpleParameterType("Integer", SeparationPolicy.OPTIONAL_QUOTATION_MARKS) {
