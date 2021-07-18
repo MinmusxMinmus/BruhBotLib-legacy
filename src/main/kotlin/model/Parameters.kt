@@ -142,7 +142,6 @@ class DecimalParameter : SimpleParameterType("Decimal number", SeparationPolicy.
     override fun getParameterValue(value: String) = DecimalValue(value.toDouble())
 }
 
-
 // Possible parameter values
 class StringValue(valueStr: String) : ParameterValue(valueStr)
 class IntegerValue(val valueInt: Int) : ParameterValue(valueInt.toString())
