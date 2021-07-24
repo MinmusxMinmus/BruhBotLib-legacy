@@ -17,6 +17,7 @@ repositories {
 
 dependencies {
     implementation(group = "net.dv8tion", name = "JDA", version = "4.3.0_277")
+    implementation(group = "com.fasterxml.jackson.core", name = "jackson-databind", version = "2.12.4")
     testImplementation(kotlin("test"))
 }
 

@@ -9,13 +9,12 @@ import java.io.Serializable
 
 /**
  * Defines all information required to use its corresponding command. Includes the name of the command, a small
- * description of both the command and the parameters it requires, a reference to the command class it belongs to, and
- * the permission the command requires to be executed.
+ * description of both the command and the parameters it requires, and the permission the command requires to be executed.
  */
-data class CommandDeclaration(val name: String,
-                              val description: String,
-                              val parameters: List<Pair<String, ParameterType>>,
-                              val permission: CommandPermission) : Serializable
+data class SimpleCommandDeclaration(val name: String,
+                                    val description: String,
+                                    val parameters: List<Pair<String, ParameterType>>,
+                                    val permission: CommandPermission) : Serializable
 
 /**
  * Valuable information about a command at any point of execution.
@@ -102,7 +101,7 @@ abstract class SimpleCommand(protected val trigger: Message) : Serializable {
     fun details() = CommandInformation(channel, author, guild, success, failure, events.last().info, arguments, events.toList())
 
     /**
-     * Returns the command's [CommandDeclaration].
+     * Returns the command's [SimpleCommandDeclaration].
      */
-    abstract fun declaration(): CommandDeclaration
+    abstract fun declaration(): SimpleCommandDeclaration
 }
