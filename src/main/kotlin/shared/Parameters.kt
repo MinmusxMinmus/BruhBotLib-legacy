@@ -59,7 +59,7 @@ sealed class SimpleParameterType(name: String, val separationPolicy: SeparationP
     }
 
     private fun parseQuotations(str: String): Pair<String, String> {
-        logger.info("Parsing parameter '$name' from string '$str' (quotation marks)")
+        logger.debug("Parsing parameter '$name' from string '$str' (quotation marks)")
         // Unreadable if it doesn't start with quotation marks
         if (!str.startsWith('"')) {
             logger.warn("Parameter '$name' had the first quotation mark missing")
@@ -116,7 +116,7 @@ sealed class SimpleParameterType(name: String, val separationPolicy: SeparationP
         }
     }
     private fun parseSpaces(str: String): Pair<String, String> {
-        logger.info("Parsing parameter '$name' from string '$str' (spaces)")
+        logger.debug("Parsing parameter '$name' from string '$str' (spaces)")
 
         // Everything is the param
         if (str.indexOf(' ') == -1) {
