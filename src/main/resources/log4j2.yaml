@@ -1,0 +1,36 @@
+Configuration:
+  name: Default
+
+  Properties:
+    Property:
+    - name: log-path
+      value: "logs"
+    - name: default-pattern
+      value: "%-10date{HH:mm:ss.SSSS} %-7level [at:%thread] [%logger] >> %m%n"
+      # If you ever change the pattern, make sure to update the IntelliJ IDEA log highlighter
+
+  Appenders:
+    Console:
+      name: ConsoleAppender
+      target: SYSTEM_ERR
+      PatternLayout:
+        pattern: ${default-pattern}
+      Filters:
+        ThresholdFilter:
+          level: warn
+
+    File:
+      name: FileAppender
+      fileName: ${log-path}/logfile.log
+      PatternLayout:
+        pattern: ${default-pattern}
+      Filters:
+        ThresholdFilter:
+          level: debug
+
+  Loggers:
+    Root:
+      level: debug
+      AppenderRef:
+        - ref: ConsoleAppender
+        - ref: FileAppender

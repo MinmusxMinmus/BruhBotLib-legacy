@@ -1,4 +1,4 @@
-package remote.model
+package shared
 
 class ArgumentParser {
     fun parse(paramString: String, expected: List<ParameterType>): List<ParameterValue> {
@@ -7,12 +7,11 @@ class ArgumentParser {
         expected.forEach {
             // Arguments have been consumed already
             if (remainingParams.isEmpty()) {
-                println("Arguments have been consumed. Missing parameter/s!")
                 arguments += MissingParameter()
                 return@forEach
             }
             try {
-                val param = it.removeFromParams(remainingParams)
+                val param = it.removeFromParams(remainingParams.trim())
                 if (!it.validate(param.first)) {
                     arguments += BadParameter(it)
                     return@forEach
@@ -26,7 +25,6 @@ class ArgumentParser {
         }
         // If there's still text, it means the parameters were malformed
         if (!remainingParams.isEmpty()) {
-            println("There's still text ($remainingParams), bad")
             arguments += GenericError("Missing parameters")
         }
         return arguments.toList()

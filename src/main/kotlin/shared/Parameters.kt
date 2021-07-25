@@ -1,5 +1,7 @@
-package remote.model
+package shared
 
+import shared.MissingFirstQuotation
+import shared.ParameterError
 import java.io.Serializable
 import java.lang.NumberFormatException
 
@@ -108,7 +110,7 @@ class StringParameter(val canContainSpaces: Boolean) : SimpleParameterType("Stri
     override fun getParameterValue(value: String) = StringValue(value)
 }
 class KeywordParameter(val words: Set<String>) : SimpleParameterType(words.joinToString(separator = "\", \"", prefix = "\"", postfix = "\"") { it }, SeparationPolicy.OPTIONAL_QUOTATION_MARKS) {
-    override fun validate(param: String) = words.contains(param)
+    override fun validate(param: String) = words.contains(param.trim())
     override fun badParameterMessage() = "Invalid keyword. Possible values are: ${words.joinToString(separator = "\", \"", prefix = "\"", postfix = "\"") { it }}"
     override fun getParameterValue(value: String) = StringValue(value)
 }

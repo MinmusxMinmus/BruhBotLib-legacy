@@ -1,4 +1,4 @@
-package remote.model
+package shared
 
 import java.io.Serializable
 import java.time.Instant

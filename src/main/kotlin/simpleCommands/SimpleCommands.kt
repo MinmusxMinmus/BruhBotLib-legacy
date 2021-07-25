@@ -1,10 +1,10 @@
-package model
+package simpleCommands
 
 import net.dv8tion.jda.api.entities.Guild
 import net.dv8tion.jda.api.entities.Message
 import net.dv8tion.jda.api.entities.MessageChannel
 import net.dv8tion.jda.api.entities.User
-import remote.model.*
+import shared.*
 import java.io.Serializable
 
 /**
