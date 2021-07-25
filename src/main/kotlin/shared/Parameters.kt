@@ -1,9 +1,9 @@
 package shared
 
-import shared.MissingFirstQuotation
-import shared.ParameterError
 import java.io.Serializable
 import java.lang.NumberFormatException
+
+// TODO add optional parameter support. Optional parameters should technically just be assuming that if the splitting went wrong, the parameter wasn't included
 
 /**
  * Defines the separator policy used by simple parameters.
@@ -47,7 +47,11 @@ sealed class ParameterType(val name: String, var error: ParameterError?): Serial
  * Represents a simple parameter type. Simple parameters use a special [SeparationPolicy] to determine how they're split
  *
  */
-sealed class SimpleParameterType(name: String, val separationPolicy: SeparationPolicy) : ParameterType(name, null) {
+sealed class SimpleParameterType(name: String, val separationPolicy: SeparationPolicy) : ParameterType(name, null), Logging {
+    companion object: Logging {
+        val logger = logger()
+    }
+
     override fun removeFromParams(remainingParams: String) = when (separationPolicy) {
         SeparationPolicy.QUOTATION_MARKS -> parseQuotations(remainingParams)
         SeparationPolicy.OPTIONAL_QUOTATION_MARKS -> if (remainingParams.startsWith('"')) parseQuotations(remainingParams) else parseSpaces(remainingParams)
@@ -55,45 +59,78 @@ sealed class SimpleParameterType(name: String, val separationPolicy: SeparationP
     }
 
     private fun parseQuotations(str: String): Pair<String, String> {
+        logger.info("Parsing parameter '$name' from string '$str' (quotation marks)")
         // Unreadable if it doesn't start with quotation marks
         if (!str.startsWith('"')) {
+            logger.warn("Parameter '$name' had the first quotation mark missing")
             error = MissingFirstQuotation()
             return Pair("", str)
         }
 
         // Remove first quotation marks
         val ret = str.substring(1)
+        logger.debug("Looking for the next valid quotation mark in string '$ret'")
 
         // Search for the end of the parameter
         var currentIndex = 0
         while (true) {
+            var valid = true
             val i = ret.indexOf('"', startIndex = currentIndex)
+            logger.debug("Plausible ending quotation mark found at index $i")
 
             // If -1 it means there's no more quotation marks
             // If 0 it means the parameter is an empty string
             if (i < 1) {
-                if (i == -1) error = MissingLastQuotation()
-                return Pair("", str)
+                if (i == -1) {
+                    logger.warn("Unable to find ending quotation mark (no more quotation marks found)")
+                    error = MissingLastQuotation()
+                } else
+                    logger.debug("Ending quotation mark found right after the beginning one: this must be an empty parameter")
+                return "" to str
             }
 
             // If escaped, better luck next time
-            if (ret[i - 1] == '\\') currentIndex = i
-
-            // If that's it, this is unreadable
-            // Otherwise put the correct value in currentIndex
-            if (ret.length == i + 1) {
-                error = MissingLastQuotation()
-                return Pair("", str)
+            if (ret[i - 1] == '\\') {
+                logger.debug("Index contained an escaped quotation mark. Looking for the next one...")
+                currentIndex = i
+                valid = false
             }
-            currentIndex++
+
+            // If it was a valid quotation mark, we got it
+            // If it wasn't:
+            //  If that's it, this is unreadable
+            //  Otherwise put the next non-quotation mark in currentIndex and continue searching
+            if (valid) {
+                logger.debug("Ending quotation mark at $currentIndex confirmed")
+                val arg = str.substring(0, currentIndex).trim()
+                logger.info("Parameter '$name' parsed as '$arg'")
+                return arg to str.removePrefix(arg).trim()
+            } else {
+                if (ret.length == i + 1) {
+                    logger.warn("Unable to find ending quotation mark (last possible ending quotation mark found and discarded)")
+                    error = MissingLastQuotation()
+                    return "" to str
+                }
+                currentIndex++
+            }
         }
     }
     private fun parseSpaces(str: String): Pair<String, String> {
+        logger.info("Parsing parameter '$name' from string '$str' (spaces)")
+
         // Everything is the param
-        if (str.indexOf(' ') == -1) return Pair(str, "")
+        if (str.indexOf(' ') == -1) {
+            logger.debug("No following space characters found: the entire string must be the parameter")
+            logger.info("Parameter '$name' parsed as '$str'")
+            return str to ""
+        }
 
         // Get param
-        return  Pair(str.substring(0, str.indexOf(' ')), str.substring(str.indexOf(' '), str.length).trim())
+        val space = str.indexOf(' ')
+        val arg = str.substring(0, space)
+        val rest = str.substring(space, str.length).trim()
+        logger.info("Parameter '$name' parsed as '$arg'")
+        return arg to rest
     }
 }
 
