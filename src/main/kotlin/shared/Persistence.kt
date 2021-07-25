@@ -7,6 +7,7 @@ import rmi.BBModule
 import simpleCommands.SimpleCommandDeclaration
 
 import com.mongodb.client.model.Filters.*
+import javax.print.Doc
 
 /*
 The objective is to have a way for a module to store shit in database. A command must specify the module it belongs to
@@ -47,12 +48,11 @@ object PersistenceManager: Logging {
         logger.info("Retrieving document with id: '${id.toHexString()}' (module: '${module.name()}', command: '${command.name}')")
         val collection = db.getCollection(module.name())
         return collection.find(and(eq("_id", id), eq("command", command.name)))
-            .firstOrNull()?.let {
-                logger.info("Document with id '$id' found in database (name: '${it["name"]}')")
-                it["value"] as Document
-            } ?: let {
-            logger.warn("Document with id '$id' not found in database")
-            null
-        }
+            .firstOrNull()?.get("value").also {
+                if (it == null)
+                    logger.warn("Document with id '$id' not found in database")
+                else
+                    logger.info("Document with id '$id' found in database (name: '${(it as Document)["name"]}')")
+            } as Document?
     }
 }
