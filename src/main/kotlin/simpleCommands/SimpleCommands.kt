@@ -38,13 +38,14 @@ data class CommandInformation(val channel: MessageChannel,
  * times. The only information required to execute the command should be contained in the [trigger] message sent at
  * the beginning.
  */
-abstract class SimpleCommand(protected val trigger: Message) : Serializable {
+abstract class SimpleCommand(protected val trigger: Message) {
     // Shortcuts
     val channel get() = trigger.channel
     val author get() = trigger.author
     val guild get() = trigger.guild
 
     protected val arguments by lazy {
+
         val cmdname = declaration().name
         val args = trigger.contentRaw.substring(trigger.contentRaw.indexOf(cmdname) + cmdname.length).trim()
         ArgumentParser().parse(args, declaration().parameters.map { it.second })
