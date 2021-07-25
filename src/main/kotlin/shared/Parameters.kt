@@ -146,7 +146,7 @@ class StringParameter(val canContainSpaces: Boolean) : SimpleParameterType("Stri
     override fun badParameterMessage() = "There's no way to get this message"
     override fun getParameterValue(value: String) = StringValue(value)
 }
-class KeywordParameter(val words: Set<String>) : SimpleParameterType(words.joinToString(separator = "\", \"", prefix = "\"", postfix = "\"") { it }, SeparationPolicy.OPTIONAL_QUOTATION_MARKS) {
+class KeywordParameter(val words: Set<String>) : SimpleParameterType(words.joinToString(separator = "\", \"", prefix = " Keywords (\"", postfix = "\")"), SeparationPolicy.OPTIONAL_QUOTATION_MARKS) {
     override fun validate(param: String) = words.contains(param.trim())
     override fun badParameterMessage() = "Invalid keyword. Possible values are: ${words.joinToString(separator = "\", \"", prefix = "\"", postfix = "\"") { it }}"
     override fun getParameterValue(value: String) = StringValue(value)
