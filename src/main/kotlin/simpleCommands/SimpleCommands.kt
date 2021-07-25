@@ -38,17 +38,23 @@ data class CommandInformation(val channel: MessageChannel,
  * times. The only information required to execute the command should be contained in the [trigger] message sent at
  * the beginning.
  */
-abstract class SimpleCommand(protected val trigger: Message) {
+abstract class SimpleCommand(protected val trigger: Message): Logging {
+    companion object : Logging {
+        val logger = logger()
+    }
     // Shortcuts
     val channel get() = trigger.channel
     val author get() = trigger.author
     val guild get() = trigger.guild
 
     protected val arguments by lazy {
-
         val cmdname = declaration().name
+        logger.info("Parsing arguments of command '$cmdname'")
         val args = trigger.contentRaw.substring(trigger.contentRaw.indexOf(cmdname) + cmdname.length).trim()
-        ArgumentParser().parse(args, declaration().parameters.map { it.second })
+        logger.debug("Argument string: '$args'")
+        ArgumentParser().parse(args, declaration().parameters.map { it.second }).also {
+            logger.info("Arguments parsed successfully")
+        }
     }
     protected val events = mutableListOf<ExecutionEventBase>()
 
@@ -59,14 +65,18 @@ abstract class SimpleCommand(protected val trigger: Message) {
 
     fun execute() {
         // Permission check
+        logger.debug("Checking command permissions")
         if (!declaration().permission.validatePermission(trigger)) {
+            logger.warn("Command failed permission check")
             events.add(ExecutionError(info = "Permission check failed. Command cannot execute.", exception = null))
             execWhenBadPerms()
             return
         }
 
         // Argument check
+        logger.debug("Checking command arguments")
         if (arguments.size != declaration().parameters.size || arguments.any { it is ParameterError }) {
+            logger.warn("Command failed argument check")
             events.add(ExecutionError(info = "Argument check failed. Command cannot execute.", exception = null))
             execWhenBadArgs()
             return
@@ -74,8 +84,12 @@ abstract class SimpleCommand(protected val trigger: Message) {
 
         // Actual command
         try {
+            logger.debug("Executing command")
             execCommand()
+            logger.info("Command finished execution successfully")
         } catch (e: Exception) {
+            logger.warn("Command failed execution due to unknown exception")
+            logger.warn("Trace: ${e.stackTraceToString()}")
             events.add(ExecutionError(info = "Unknown exception caused termination.", exception = e))
         } finally {
             executed = true
