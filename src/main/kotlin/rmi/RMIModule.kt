@@ -8,6 +8,8 @@ import net.dv8tion.jda.api.entities.ChannelType
 import net.dv8tion.jda.api.entities.Message
 import net.dv8tion.jda.api.requests.GatewayIntent
 import net.dv8tion.jda.api.requests.RestAction
+import shared.Logging
+import shared.logger
 import java.io.Serializable
 import java.rmi.Remote
 import java.rmi.RemoteException
@@ -30,9 +32,10 @@ TODO: Allow module conflicts to be resolved somewhere (CMD?), instead of discard
  * functionality that is not necessary for basic execution. An example would be a module that only
  * offers additional commands to the bot.
  */
-interface BBModule : Remote {
-    companion object {
+interface BBModule : Remote, Logging {
+    companion object : Logging {
         lateinit var jda: JDA
+        private val logger = logger()
     }
 
     /**
@@ -66,9 +69,9 @@ interface BBModule : Remote {
      */
     @Throws(RemoteException::class)
     fun executeSimpleCommand(declaration: SimpleCommandDeclaration, message: MessageOrigin) {
-        val msg = message.get(jda)?.complete()
-        if (msg != null)
-            getCommand(declaration, msg).execute()
+        val msg = message.get(jda)?.queue {
+            getCommand(declaration, it).execute()
+        }
     }
 
     /**
@@ -76,7 +79,9 @@ interface BBModule : Remote {
      */
     @Throws(RemoteException::class)
     fun buildJDA(token: String) {
+        logger.warn("JDA building begin. Don't call any commands or other functions before this finishes")
         jda = JDABuilder.createDefault(token, intents()).build().awaitReady()
+        logger.warn("JDA building finished")
     }
 }
 
