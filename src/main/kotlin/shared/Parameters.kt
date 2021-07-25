@@ -59,10 +59,10 @@ sealed class SimpleParameterType(name: String, val separationPolicy: SeparationP
     }
 
     private fun parseQuotations(str: String): Pair<String, String> {
-        logger.debug("Parsing parameter '$name' from string '$str' (quotation marks)")
+        logger.debug("Parsing parameter of type '$name' from string '$str' (quotation marks)")
         // Unreadable if it doesn't start with quotation marks
         if (!str.startsWith('"')) {
-            logger.warn("Parameter '$name' had the first quotation mark missing")
+            logger.warn("Parameter of type '$name' had the first quotation mark missing")
             error = MissingFirstQuotation()
             return Pair("", str)
         }
@@ -103,7 +103,7 @@ sealed class SimpleParameterType(name: String, val separationPolicy: SeparationP
             if (valid) {
                 logger.debug("Ending quotation mark at $currentIndex confirmed")
                 val arg = str.substring(0, currentIndex).trim()
-                logger.info("Parameter '$name' parsed as '$arg'")
+                logger.info("Parameter of type '$name' parsed as '$arg'")
                 return arg to str.removePrefix(arg).trim()
             } else {
                 if (ret.length == i + 1) {
@@ -116,12 +116,12 @@ sealed class SimpleParameterType(name: String, val separationPolicy: SeparationP
         }
     }
     private fun parseSpaces(str: String): Pair<String, String> {
-        logger.debug("Parsing parameter '$name' from string '$str' (spaces)")
+        logger.debug("Parsing parameter of type '$name' from string '$str' (spaces)")
 
         // Everything is the param
         if (str.indexOf(' ') == -1) {
             logger.debug("No following space characters found: the entire string must be the parameter")
-            logger.info("Parameter '$name' parsed as '$str'")
+            logger.info("Parameter of type '$name' parsed as '$str'")
             return str to ""
         }
 
@@ -129,7 +129,7 @@ sealed class SimpleParameterType(name: String, val separationPolicy: SeparationP
         val space = str.indexOf(' ')
         val arg = str.substring(0, space)
         val rest = str.substring(space, str.length).trim()
-        logger.info("Parameter '$name' parsed as '$arg'")
+        logger.info("Parameter of type '$name' parsed as '$arg'")
         return arg to rest
     }
 }
