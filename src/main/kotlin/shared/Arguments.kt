@@ -11,7 +11,7 @@ class ArgumentParser: Logging {
         val arguments = mutableListOf<ParameterValue>()
         expected.forEach {
             var wildcard = false
-            logger.debug("Parsing parameter '${it.name}'")
+            logger.debug("Parsing parameter of type '${it.name}'")
             // Arguments have been consumed already
             if (remainingParams.isEmpty()) {
                 if (it is WildcardType) {
@@ -28,18 +28,18 @@ class ArgumentParser: Logging {
                 try {
                     remainingParams = remainingParams.trim()
                     val param = it.removeFromParams(remainingParams)
-                    logger.debug("Argument '${it.name}' splits the argument string in the following manner:")
+                    logger.debug("Argument of type '${it.name}' splits the argument string in the following manner:")
                     logger.debug("'${param.first}' - '${param.second}'")
                     if (!it.validate(param.first)) {
-                        logger.warn("Argument '${it.name}' failed to validate string '${param.first}'. This usually means the argument string part was written incorrectly")
+                        logger.warn("Argument of type '${it.name}' failed to validate string '${param.first}'. This usually means the argument string part was written incorrectly")
                         arguments += BadParameter(it)
                         return@forEach
                     }
-                    logger.info("Argument '${it.name}' successfully parsed the argument string")
+                    logger.info("Argument of type '${it.name}' successfully parsed the argument string")
                     arguments += it.getParameterValue(param.first)
                     remainingParams = param.second
                 } catch (e: Exception) {
-                    logger.warn("Argument '${it.name}' threw an exception while parsing or validating argument string '${remainingParams}'")
+                    logger.warn("Argument of type '${it.name}' threw an exception while parsing or validating argument string '${remainingParams}'")
                     logger.warn("Trace: ${e.stackTraceToString()}")
                     arguments += ExceptionThrown(e)
                     return@forEach
@@ -48,7 +48,7 @@ class ArgumentParser: Logging {
         }
         // If there's still text, it means the parameters were malformed
         if (!remainingParams.isEmpty()) {
-            logger.warn("Argument string left '$remainingParams' after parsing all arguments. This usually means the user added more parameters than required.")
+            logger.warn("Argument string not empty after parsing all arguments (still contains '$remainingParams'). This usually means the end user added more parameters than required.")
             arguments += GenericError("Missing parameters")
         }
         logger.info("Parsing of string '$paramString' ended")
