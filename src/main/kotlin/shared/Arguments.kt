@@ -62,4 +62,4 @@ class BadParameter(type: ParameterType) : ParameterError(type.badParameterMessag
 /**
  * Represents a general parsing mistake, where an unknown exception has been thrown by the parser.
  */
-class ExceptionThrown(val exception: Exception) : ParameterError("An exception was thrown during parameter parsing.")
+class ExceptionThrown(exception: Exception) : ParameterError("An exception was thrown during parameter parsing (${exception.message}).\nYou should probably let the bot owner know about this.")
