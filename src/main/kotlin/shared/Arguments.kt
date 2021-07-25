@@ -1,32 +1,57 @@
 package shared
 
-class ArgumentParser {
+class ArgumentParser: Logging {
+    companion object: Logging {
+        val logger = logger()
+    }
+
     fun parse(paramString: String, expected: List<ParameterType>): List<ParameterValue> {
+        logger.info("Parsing parameters from string '$paramString'")
         var remainingParams = paramString
         val arguments = mutableListOf<ParameterValue>()
         expected.forEach {
+            var wildcard = false
+            logger.debug("Parsing parameter '${it.name}'")
             // Arguments have been consumed already
             if (remainingParams.isEmpty()) {
-                arguments += MissingParameter()
-                return@forEach
-            }
-            try {
-                val param = it.removeFromParams(remainingParams.trim())
-                if (!it.validate(param.first)) {
-                    arguments += BadParameter(it)
+                if (it is WildcardType) {
+                    logger.debug("Parameter string is empty, but current parameter is of type ${WildcardType::class.simpleName} so everything is fine")
+                    arguments += it.getParameterValue(remainingParams)
+                    wildcard = true
+                } else {
+                    logger.warn("Argument string is empty. No argument to parse, this usually means previous parameters parsed incorrectly.")
+                    arguments += MissingParameter()
                     return@forEach
                 }
-                arguments += it.getParameterValue(param.first)
-                remainingParams = param.second
-            } catch (e: Exception) {
-                arguments += ExceptionThrown(e)
-                return@forEach
+            }
+            if (!wildcard) {
+                try {
+                    remainingParams = remainingParams.trim()
+                    val param = it.removeFromParams(remainingParams)
+                    logger.debug("Argument '${it.name}' splits the argument string in the following manner:")
+                    logger.debug("'${param.first}' - '${param.second}'")
+                    if (!it.validate(param.first)) {
+                        logger.warn("Argument '${it.name}' failed to validate string '${param.first}'. This usually means the argument string part was written incorrectly")
+                        arguments += BadParameter(it)
+                        return@forEach
+                    }
+                    logger.info("Argument '${it.name}' successfully parsed the argument string")
+                    arguments += it.getParameterValue(param.first)
+                    remainingParams = param.second
+                } catch (e: Exception) {
+                    logger.warn("Argument '${it.name}' threw an exception while parsing or validating argument string '${remainingParams}'")
+                    logger.warn("Trace: ${e.stackTraceToString()}")
+                    arguments += ExceptionThrown(e)
+                    return@forEach
+                }
             }
         }
         // If there's still text, it means the parameters were malformed
         if (!remainingParams.isEmpty()) {
+            logger.warn("Argument string left '$remainingParams' after parsing all arguments. This usually means the user added more parameters than required.")
             arguments += GenericError("Missing parameters")
         }
+        logger.info("Parsing of string '$paramString' ended")
         return arguments.toList()
     }
 }
