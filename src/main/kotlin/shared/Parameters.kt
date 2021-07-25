@@ -49,7 +49,7 @@ sealed class ParameterType(val name: String, var error: ParameterError?): Serial
  */
 sealed class SimpleParameterType(name: String, val separationPolicy: SeparationPolicy) : ParameterType(name, null), Logging {
     companion object: Logging {
-        val logger = logger()
+        private val logger = logger()
     }
 
     override fun removeFromParams(remainingParams: String) = when (separationPolicy) {

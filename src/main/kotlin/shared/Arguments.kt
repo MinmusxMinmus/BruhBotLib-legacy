@@ -2,7 +2,7 @@ package shared
 
 class ArgumentParser: Logging {
     companion object: Logging {
-        val logger = logger()
+        private val logger = logger()
     }
 
     fun parse(paramString: String, expected: List<ParameterType>): List<ParameterValue> {
