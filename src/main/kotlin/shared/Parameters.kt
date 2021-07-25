@@ -141,7 +141,7 @@ class WildcardType : ParameterType("Anything", null) {
     override fun removeFromParams(remainingParams: String) = Pair(remainingParams, "")
     override fun validate(param: String) = true
 }
-class StringParameter(val canContainSpaces: Boolean) : SimpleParameterType("String", if (canContainSpaces) SeparationPolicy.QUOTATION_MARKS else SeparationPolicy.OPTIONAL_QUOTATION_MARKS) {
+class StringParameter(val canContainSpaces: Boolean) : SimpleParameterType("String (${if (canContainSpaces) "Quotation mark/Space-separated" else "Quotation mark-separated"})", if (canContainSpaces) SeparationPolicy.QUOTATION_MARKS else SeparationPolicy.OPTIONAL_QUOTATION_MARKS) {
     override fun validate(param: String) = true
     override fun badParameterMessage() = "There's no way to get this message"
     override fun getParameterValue(value: String) = StringValue(value)
