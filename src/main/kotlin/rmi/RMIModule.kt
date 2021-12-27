@@ -69,7 +69,7 @@ interface BBModule : Remote, Logging {
      */
     @Throws(RemoteException::class)
     fun executeSimpleCommand(declaration: SimpleCommandDeclaration, message: MessageOrigin) {
-        val msg = message.get(jda)?.queue {
+        message.get(jda)?.queue {
             getCommand(declaration, it).execute()
         }
     }
