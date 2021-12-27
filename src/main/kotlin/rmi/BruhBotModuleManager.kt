@@ -5,8 +5,7 @@ import shared.logger
 import java.rmi.registry.LocateRegistry
 import java.rmi.server.UnicastRemoteObject
 
-
-object RMIModuleLoader: Logging {
+object BruhBotModuleManager: Logging {
     private val logger = logger()
     private const val PORT_STUB = 0
     private const val PORT_REGISTRY = 1099
