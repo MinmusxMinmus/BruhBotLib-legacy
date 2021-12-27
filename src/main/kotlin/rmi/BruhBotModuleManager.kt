@@ -24,4 +24,17 @@ object BruhBotModuleManager: Logging {
             logger.error("Trace: ${e.stackTraceToString()}")
         }
     }
+
+    fun unregister(module: BBModule) {
+        try {
+            logger.info("Unregistering module '${module.name()}'")
+            val registry = LocateRegistry.getRegistry(PORT_REGISTRY)
+            logger.debug("Registry located at port $PORT_REGISTRY")
+            registry.unbind(module.name())
+            logger.info("Successfully unregistered module '${module.name()}'")
+        } catch (e: Exception) {
+            logger.error("Unable to unregister module '${module.name()}'")
+            logger.error("Trace: ${e.stackTraceToString()}")
+        }
+    }
 }
