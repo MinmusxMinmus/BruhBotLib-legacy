@@ -13,14 +13,20 @@ class WildcardParameterParser(private val param: Any? = null): ParameterParser {
     override fun parse(): ParameterResult = WildcardParameterValue(param)
 }
 
-abstract class ParameterParserFromString(protected val param: String): ParameterParser
+abstract class ParameterParserFromString: ParameterParser {
+    protected lateinit var param: String
 
-open class StringParameterParser(param: String): ParameterParserFromString(param) {
+    fun parameter(param: String) {
+        this.param = param
+    }
+}
+
+open class StringParameterParser(): ParameterParserFromString() {
     override fun getType(): StringParameterType = StringParameterType()
     override fun parse(): ParameterResult = StringParameterValue(param)
 }
 
-open class BooleanParameterParser(param: String): ParameterParserFromString(param) {
+open class BooleanParameterParser(): ParameterParserFromString() {
     override fun getType(): ParameterType = BooleanParameterType()
     override fun parse(): ParameterResult {
         return try { BooleanParameterValue(param.toBooleanStrict()) }
@@ -29,7 +35,7 @@ open class BooleanParameterParser(param: String): ParameterParserFromString(para
     }
 }
 
-open class NumberParameterParser(param: String): ParameterParserFromString(param) {
+open class NumberParameterParser(): ParameterParserFromString() {
     override fun getType(): ParameterType = NumberParameterType()
     override fun parse(): ParameterResult {
         return try { IntegerParameterValue(param.toInt()) }
@@ -42,7 +48,7 @@ open class NumberParameterParser(param: String): ParameterParserFromString(param
     }
 }
 
-open class IntegerParameterParser(param: String): NumberParameterParser(param) {
+open class IntegerParameterParser(): NumberParameterParser() {
     override fun getType(): ParameterType = IntegerParameterType()
     override fun parse(): ParameterResult {
         return try { IntegerParameterValue(param.toInt()) }
@@ -51,7 +57,7 @@ open class IntegerParameterParser(param: String): NumberParameterParser(param) {
     }
 }
 
-open class DecimalParameterParser(param: String): NumberParameterParser(param) {
+open class DecimalParameterParser(): NumberParameterParser() {
     override fun getType(): ParameterType = DecimalParameterType()
     override fun parse(): ParameterResult {
         return try { DecimalParameterValue(param.toDouble()) }
