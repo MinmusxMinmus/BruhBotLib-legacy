@@ -2,8 +2,13 @@ package parameters
 
 import parameters.parsers.*
 import parameters.types.*
-import parameters.values.StringParameterValue
 
+/*
+A parameter is defined as any sort of resource that might be used as input by any sort of bot public service.
+The Parameter interface requires two different objects associated to it: a ParameterType class defining the basic
+information for the parameter, and a ParameterParser class to decode a specific object into a ParameterValue class
+representing its value.
+ */
 interface Parameter {
     fun type(): ParameterType
     fun parser(): ParameterParser

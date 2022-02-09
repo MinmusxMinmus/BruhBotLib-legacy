@@ -1,5 +1,9 @@
 package parameters.types
 
+/*
+ParameterType classes specify the blueprint of a certain type parameter. This includes the name("string", "image",
+"boolean", "choice", etc) and a short description.
+ */
 interface ParameterType {
     fun getName(): String
     fun getDescription(): String

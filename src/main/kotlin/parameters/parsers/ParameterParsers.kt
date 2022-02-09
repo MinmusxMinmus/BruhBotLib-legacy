@@ -3,6 +3,10 @@ package parameters.parsers
 import parameters.types.*
 import parameters.values.*
 
+/*
+ParameterParser classes transform objects into their ParameterValue representations. The parsers will get all their
+required data from their own custom functions.
+ */
 interface ParameterParser {
     fun getType(): ParameterType
     fun parse(): ParameterResult
