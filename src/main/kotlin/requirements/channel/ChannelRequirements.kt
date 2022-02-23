@@ -3,10 +3,11 @@ package requirements.channel
 import net.dv8tion.jda.api.entities.AbstractChannel
 import net.dv8tion.jda.api.entities.ChannelType
 import requirements.Requirement
+import requirements.RequirementInformation
 
-abstract class ChannelRequirement(protected val channel: AbstractChannel): Requirement
+abstract class ChannelRequirement(): Requirement
 
-class RequireChannelName(channel: AbstractChannel, private val compareTo: String, private val check: ChannelNameCheck): ChannelRequirement(channel) {
+class RequireChannelName(channel: AbstractChannel, private val compareTo: String, private val check: ChannelNameCheck): ChannelRequirement() {
     enum class ChannelNameCheck {
         FULL_NAME,
         CONTAINS,
@@ -21,13 +22,13 @@ class RequireChannelName(channel: AbstractChannel, private val compareTo: String
         }
     }
 
-    override fun check() = check.check(channel.name, compareTo)
+    override fun check(information: RequirementInformation) = check.check((information.get("") as AbstractChannel).name, compareTo)
 }
 
-class RequireChannelType(channel: AbstractChannel, private val type: ChannelType) : ChannelRequirement(channel) {
-    override fun check() = channel.type == type
+class RequireChannelType(private val type: ChannelType) : ChannelRequirement() {
+    override fun check(information: RequirementInformation) = information.get("") == type
 }
 
-class RequireChannel(channel: AbstractChannel, private val channelId: Long) : ChannelRequirement(channel) {
-    override fun check() = channel.idLong == channelId
+class RequireChannel(private val channelId: Long) : ChannelRequirement() {
+    override fun check(information: RequirementInformation) = information.get("") == channelId
 }

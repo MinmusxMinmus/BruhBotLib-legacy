@@ -2,9 +2,10 @@ package requirements.user
 
 import net.dv8tion.jda.api.entities.User
 import requirements.Requirement
+import requirements.RequirementInformation
 
-abstract class UserRequirement(protected val user: User): Requirement
+abstract class UserRequirement(): Requirement
 
-class RequireUser(user: User, private val userId: Long): UserRequirement(user) {
-    override fun check() = user.idLong == userId
+class RequireUser(private val userId: Long): UserRequirement() {
+    override fun check(information: RequirementInformation) = (information.get("user") as User).idLong == userId
 }

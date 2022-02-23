@@ -3,13 +3,14 @@ package requirements.guild
 import net.dv8tion.jda.api.entities.Guild
 import net.dv8tion.jda.api.entities.User
 import requirements.Requirement
+import requirements.RequirementInformation
 
-abstract class GuildRequirement(protected val guild: Guild): Requirement
+abstract class GuildRequirement(): Requirement
 
-class RequireMember(guild: Guild, private val user: User) : GuildRequirement(guild) {
-    override fun check() = guild.isMember(user)
+class RequireMember(private val user: User) : GuildRequirement() {
+    override fun check(information: RequirementInformation) = (information.get("guild") as Guild).isMember(user)
 }
 
-class RequireGuild(guild: Guild, private val guildId: Long) : GuildRequirement(guild) {
-    override fun check() = guild.idLong == guildId
+class RequireGuild(private val guildId: Long) : GuildRequirement() {
+    override fun check(information: RequirementInformation) = (information.get("guild") as Guild).idLong == guildId
 }

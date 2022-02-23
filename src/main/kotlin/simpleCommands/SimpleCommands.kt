@@ -47,7 +47,7 @@ abstract class SimpleCommand(protected val trigger: Message): Logging {
     val author get() = trigger.author
     val guild get() = trigger.guild
 
-    protected val arguments by lazy {
+    protected val arguments by lazy     {
         val cmdname = declaration().name
         logger.info("Parsing arguments of command '$cmdname'")
         val args = trigger.contentRaw.substring(trigger.contentRaw.indexOf(cmdname) + cmdname.length).trim()
